@@ -20839,12 +20839,12 @@
 	      if (this.pc) {
 	        console.log('inside handleIceCandidateDisconnect', this.pc.iceConnectionState);
 
-	        // comment out the following check???
-	        if (this.pc.iceConnectionState === 'disconnected') {
-	          console.log('inside pc.onIceConnectionState');
-	          this.pc.close();
-	          delete conspectio.connections[this.viewerId];
-	        }
+	        // comment out the following check to allow for iceRestart
+	        // if(this.pc.iceConnectionState === 'disconnected') {
+	        //   console.log('inside pc.onIceConnectionState')
+	        //   this.pc.close();
+	        //   delete conspectio.connections[this.viewerId];
+	        // }
 	      }
 	    }
 	  }, {
@@ -20860,6 +20860,8 @@
 	        _this.pc.setLocalDescription(new RTCSessionDescription(offer));
 	      }, function (error) {
 	        console.log('Error with creating broadcaster offer', error);
+	      }, {
+	        iceRestart: true
 	      });
 	    }
 	  }, {
@@ -21046,12 +21048,12 @@
 	      if (this.pc) {
 	        console.log('inside handleIceCandidateDisconnect', this.pc.iceConnectionState);
 
-	        // comment out the following check???
-	        if (this.pc.iceConnectionState === 'disconnected') {
-	          console.log('inside pc.onIceConnectionState');
-	          this.pc.close();
-	          delete conspectio.connections[this.broadcasterId];
-	        }
+	        // comment out the following check to allow for iceRestart
+	        // if(this.pc.iceConnectionState === 'disconnected') {
+	        //   console.log('inside pc.onIceConnectionState')
+	        //   this.pc.close();
+	        //   delete conspectio.connections[this.broadcasterId];
+	        // }
 	      }
 	    }
 	  }, {
