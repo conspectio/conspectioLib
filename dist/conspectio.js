@@ -10465,8 +10465,11 @@
 	    value: function stop() {
 
 	      if (this.role && this.role === 'broadcaster') {
-	        // stop stream
+	        //stops audio
 	        this.stream.getTracks()[0].stop();
+
+	        //stops video
+	        this.stream.getTracks()[1].stop();
 
 	        // emit message to server
 	        conspectio.socket.emit('removeBroadcaster', this.eventId);
@@ -10501,7 +10504,7 @@
 	  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 	  if (navigator.getUserMedia) {
-	    navigator.getUserMedia({ video: true, audio: false }, handleVideo, videoError);
+	    navigator.getUserMedia({ video: true, audio: true }, handleVideo, videoError);
 	  }
 
 	  function handleVideo(stream) {
