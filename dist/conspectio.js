@@ -20857,7 +20857,11 @@
 	          type: "offer",
 	          offer: offer
 	        });
-	        _this.pc.setLocalDescription(new RTCSessionDescription(offer));
+
+	        // set bandwidth constraints for webrtc peer connection
+	        var sessionDescription = new RTCSessionDescription(offer);
+	        sessionDescription.sdp = _this.setSDPBandwidth(sessionDescription.sdp);
+	        _this.pc.setLocalDescription(sessionDescription);
 	      }, function (error) {
 	        console.log('Error with creating broadcaster offer', error);
 	      }, {
@@ -20885,6 +20889,14 @@
 	    value: function closeWrapper() {
 	      this.pc.close();
 	      console.log('ConspectioBroadcaster closeWrapper invoked');
+	    }
+	  }, {
+	    key: 'setSDPBandwidth',
+	    value: function setSDPBandwidth(sdp) {
+	      sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
+	      sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:50\r\n');
+	      sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:256\r\n');
+	      return sdp;
 	    }
 	  }]);
 
@@ -21067,7 +21079,11 @@
 	      var _this = this;
 
 	      this.pc.createAnswer(function (answer) {
-	        _this.pc.setLocalDescription(new RTCSessionDescription(answer));
+
+	        // set bandwidth constraints for webrtc peer connection
+	        var sessionDescription = new RTCSessionDescription(answer);
+	        sessionDescription.sdp = _this.setSDPBandwidth(sessionDescription.sdp);
+	        _this.pc.setLocalDescription(sessionDescription);
 
 	        send(_this.broadcasterId, {
 	          type: "answer",
@@ -21091,6 +21107,14 @@
 	      if (this.viewerHandlers && this.viewerHandlers.broadcasterRemoved) {
 	        this.viewerHandlers.broadcasterRemoved(this.broadcasterId.slice(2));
 	      }
+	    }
+	  }, {
+	    key: 'setSDPBandwidth',
+	    value: function setSDPBandwidth(sdp) {
+	      sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
+	      sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:50\r\n');
+	      sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:256\r\n');
+	      return sdp;
 	    }
 	  }]);
 
