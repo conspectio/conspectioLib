@@ -10465,18 +10465,21 @@
 	    value: function stop() {
 
 	      if (this.role && this.role === 'broadcaster') {
-	        // stop stream
+	        //stops audio
 	        this.stream.getTracks()[0].stop();
+
+	        //stops video
+	        this.stream.getTracks()[1].stop();
 
 	        // emit message to server
 	        conspectio.socket.emit('removeBroadcaster', this.eventId);
 	      } else if (this.role && this.role === 'viewer') {}
 
 	      // for each endpoint in connections{}, close it out
-	      for (var conspectioBroadcasterId in conspectio.connections) {
-	        conspectio.connections[conspectioBroadcasterId].removeStreamWrapper();
-	        conspectio.connections[conspectioBroadcasterId].closeWrapper();
-	        delete conspectio.connections[conspectioBroadcasterId];
+	      for (var conspectioId in conspectio.connections) {
+	        conspectio.connections[conspectioId].removeStreamWrapper();
+	        conspectio.connections[conspectioId].closeWrapper();
+	        delete conspectio.connections[conspectioId];
 	      }
 	    }
 	  }]);
@@ -10500,9 +10503,33 @@
 	  // retrieve getUserMedia
 	  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-	  if (navigator.getUserMedia) {
-	    navigator.getUserMedia({ video: true, audio: false }, handleVideo, videoError);
-	  }
+	  //uses rear facing camera by default if one is available
+	  navigator.mediaDevices.enumerateDevices().then(function (devices) {
+
+	    var videoList = [];
+	    var videoSource;
+	    var option = document.createElement('option');
+
+	    for (var i = 0; i < devices.length; i++) {
+	      if (devices[i].kind === 'videoinput') {
+	        videoList.push(devices[i].deviceId);
+	        if (devices[i].kind.length > 1) {
+	          videoSource = videoList[1];
+	        } else {
+	          videoSource = videoList[0];
+	        }
+	      }
+	    }
+	    if (navigator.getUserMedia) {
+	      navigator.getUserMedia({ video: { deviceId: videoSource ? { exact: videoSource } : undefined }, audio: true }, handleVideo, videoError);
+	    }
+	  }).catch(function (err) {
+	    console.log('Error in retrieving MediaDevices:', err);
+	  });
+
+	  // if (navigator.getUserMedia) {       
+	  //   navigator.getUserMedia({video: true, audio: true}, handleVideo, videoError);
+	  // }
 
 	  function handleVideo(stream) {
 	    // grab the broadcasterStream dom element and set the src
@@ -20839,12 +20866,12 @@
 	      if (this.pc) {
 	        console.log('inside handleIceCandidateDisconnect', this.pc.iceConnectionState);
 
-	        // comment out the following check???
-	        if (this.pc.iceConnectionState === 'disconnected') {
-	          console.log('inside pc.onIceConnectionState');
-	          this.pc.close();
-	          delete conspectio.connections[this.viewerId];
-	        }
+	        // comment out the following check to allow for iceRestart
+	        // if(this.pc.iceConnectionState === 'disconnected') {
+	        //   console.log('inside pc.onIceConnectionState')
+	        //   this.pc.close();
+	        //   delete conspectio.connections[this.viewerId];
+	        // }
 	      }
 	    }
 	  }, {
@@ -20857,9 +20884,15 @@
 	          type: "offer",
 	          offer: offer
 	        });
-	        _this.pc.setLocalDescription(new RTCSessionDescription(offer));
+
+	        // set bandwidth constraints for webrtc peer connection
+	        var sessionDescription = new RTCSessionDescription(offer);
+	        sessionDescription.sdp = _this.setSDPBandwidth(sessionDescription.sdp);
+	        _this.pc.setLocalDescription(sessionDescription);
 	      }, function (error) {
 	        console.log('Error with creating broadcaster offer', error);
+	      }, {
+	        iceRestart: true
 	      });
 	    }
 	  }, {
@@ -20883,6 +20916,14 @@
 	    value: function closeWrapper() {
 	      this.pc.close();
 	      console.log('ConspectioBroadcaster closeWrapper invoked');
+	    }
+	  }, {
+	    key: 'setSDPBandwidth',
+	    value: function setSDPBandwidth(sdp) {
+	      sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
+	      sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:50\r\n');
+	      sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:256\r\n');
+	      return sdp;
 	    }
 	  }]);
 
@@ -21046,12 +21087,12 @@
 	      if (this.pc) {
 	        console.log('inside handleIceCandidateDisconnect', this.pc.iceConnectionState);
 
-	        // comment out the following check???
-	        if (this.pc.iceConnectionState === 'disconnected') {
-	          console.log('inside pc.onIceConnectionState');
-	          this.pc.close();
-	          delete conspectio.connections[this.broadcasterId];
-	        }
+	        // comment out the following check to allow for iceRestart
+	        // if(this.pc.iceConnectionState === 'disconnected') {
+	        //   console.log('inside pc.onIceConnectionState')
+	        //   this.pc.close();
+	        //   delete conspectio.connections[this.broadcasterId];
+	        // }
 	      }
 	    }
 	  }, {
@@ -21065,7 +21106,11 @@
 	      var _this = this;
 
 	      this.pc.createAnswer(function (answer) {
-	        _this.pc.setLocalDescription(new RTCSessionDescription(answer));
+
+	        // set bandwidth constraints for webrtc peer connection
+	        var sessionDescription = new RTCSessionDescription(answer);
+	        sessionDescription.sdp = _this.setSDPBandwidth(sessionDescription.sdp);
+	        _this.pc.setLocalDescription(sessionDescription);
 
 	        send(_this.broadcasterId, {
 	          type: "answer",
@@ -21089,6 +21134,14 @@
 	      if (this.viewerHandlers && this.viewerHandlers.broadcasterRemoved) {
 	        this.viewerHandlers.broadcasterRemoved(this.broadcasterId.slice(2));
 	      }
+	    }
+	  }, {
+	    key: 'setSDPBandwidth',
+	    value: function setSDPBandwidth(sdp) {
+	      sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
+	      sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:50\r\n');
+	      sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:256\r\n');
+	      return sdp;
 	    }
 	  }]);
 
