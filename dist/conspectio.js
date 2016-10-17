@@ -10439,7 +10439,7 @@
 	      if (this.role && this.role === 'broadcaster') {
 	        (function () {
 	          // reset conspectio.connections
-	          conspectio.connections = {};
+	          // conspectio.connections = {};
 
 	          // emit message to server
 	          conspectio.socket.emit('sendEventTag', _this.eventId);
