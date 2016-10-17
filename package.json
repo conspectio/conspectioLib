@@ -1,10 +1,10 @@
 {
-  "name": "conspectio-lib",
+  "name": "conspectio",
   "version": "1.0.0",
-  "description": "Library for multiple live streams",
+  "description": "Conspectio is a library that provides the ability to display multiple one-to-many live stream broadcasts all in one view. Conspectio is built with WebRTC and Socket.io.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server/server.js",
+    "start": "nodemon demo/server/server.js",
     "build": "./node_modules/.bin/webpack -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +18,7 @@
     "webrtc",
     "socket"
   ],
-  "author": "Diana Cheung, Simon Situ, Dana Tran",
+  "author": "Diana Cheung, Simon Situ, Dana Tran, <conspectio.js@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/conspectio/conspectioLib/issues"

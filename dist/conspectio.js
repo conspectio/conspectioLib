@@ -10439,7 +10439,7 @@
 	      if (this.role && this.role === 'broadcaster') {
 	        (function () {
 	          // reset conspectio.connections
-	          conspectio.connections = {};
+	          // conspectio.connections = {};
 
 	          // emit message to server
 	          conspectio.socket.emit('sendEventTag', _this.eventId);
@@ -21160,12 +21160,12 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var ConspectioConnection = function () {
-	  function ConspectioConnection() {
-	    _classCallCheck(this, ConspectioConnection);
+	var ConspectioManager = function () {
+	  function ConspectioManager() {
+	    _classCallCheck(this, ConspectioManager);
 	  }
 
-	  _createClass(ConspectioConnection, [{
+	  _createClass(ConspectioManager, [{
 	    key: 'init',
 	    value: function init(callback) {
 	      // emit message to server
@@ -21179,10 +21179,10 @@
 	    }
 	  }]);
 
-	  return ConspectioConnection;
+	  return ConspectioManager;
 	}();
 
-	module.exports = ConspectioConnection;
+	module.exports = ConspectioManager;
 
 /***/ }
 /******/ ]);
