@@ -18,7 +18,7 @@
     "webrtc",
     "socket"
   ],
-  "author": "Diana Cheung, Simon Situ, Dana Tran, <conpsectio.js@gmail.com>",
+  "author": "Diana Cheung, Simon Situ, Dana Tran, <conspectio.js@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/conspectio/conspectioLib/issues"
